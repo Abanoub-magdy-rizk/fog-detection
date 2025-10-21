@@ -34,3 +34,23 @@ This project uses the **Daphnet Freezing of Gait Dataset**, collected from Parki
 
 ## 📂 Project Structure (Planned)
 
+FoG_Prediction_Project/
+├─ data/                      # Raw and processed dataset files
+│  ├─ raw/                    # Original Daphnet dataset (not included)
+│  └─ processed/              # Cleaned and preprocessed data
+│
+├─ scripts/                   # Main project pipeline
+│  ├─ 01_preprocess.py        # Filtering, normalization, and signal cleaning
+│  ├─ 02_windowing.py         # Sliding-window segmentation and labeling
+│  ├─ 03_features.py          # Feature extraction (time/freq/time-frequency)
+│  ├─ 04_images_generator.py  # Generate RP/STFT/PWVD images
+│  ├─ 05_train_models.py      # ML/DL model training
+│  └─ 06_ensemble_eval.py     # Final evaluation and ensemble learning
+│
+├─ models/                    # Saved machine/deep learning trained models
+│
+├─ results/                   # Plots, metrics, confusion matrix, PR-curves
+│
+├─ requirements.txt           # Python dependencies
+├─ README.md                  # Project documentation
+└─ .gitignore                 # Files/folders excluded from git tracking

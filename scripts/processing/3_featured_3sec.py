@@ -1,17 +1,18 @@
 import numpy as np
-from scipy.stats import skew, kurtosis, entropy
+from scipy.stats import skew, kurtosis
 from scipy.fft import fft, fftfreq
-import os
+from pathlib import Path
+import pandas as pd
 
-# ==========================
+# =============================
 # Magnitude
-# ==========================
+# =============================
 def compute_magnitude(window_xyz):
     return np.sqrt(np.sum(window_xyz**2, axis=1))
 
-# ==========================
+# =============================
 # Spectral Helpers
-# ==========================
+# =============================
 def spectral_entropy(Pxx):
     Pxx_norm = Pxx / np.sum(Pxx)
     return -np.sum(Pxx_norm * np.log2(Pxx_norm + 1e-12))
@@ -22,13 +23,13 @@ def spectral_rolloff(freqs, Pxx, roll_percent=0.85):
     idx = np.where(cumulative_energy >= threshold)[0][0]
     return freqs[idx]
 
-# ==========================
-# 27 Features per window
-# ==========================
+# =============================
+# 27 features per window
+# =============================
 def extract_features(sig, fs=64):
     N = len(sig)
 
-    # ----- Time-domain -----
+    # ---- Time Domain ----
     mean_val = np.mean(sig)
     std_val = np.std(sig)
     var_val = np.var(sig)
@@ -42,7 +43,7 @@ def extract_features(sig, fs=64):
     energy = np.sum(sig**2)
     sma = np.sum(np.abs(sig)) / N
 
-    # ----- Frequency-domain -----
+    # ---- Frequency Domain ----
     freqs = fftfreq(N, 1/fs)
     fft_vals = np.abs(fft(sig))
     Pxx = fft_vals[:N//2] ** 2
@@ -72,32 +73,39 @@ def extract_features(sig, fs=64):
         freq_var, freq_kurt, freq_skew, dc_comp, peak_freq, roll_off, flux, flatness, bandwidth
     ]
 
-# ==========================
-# Main Script
-# ==========================
+# =============================
+# Main
+# =============================
 if __name__ == "__main__":
-    input_dir = r"..\data\processed"
-    save_path = r"..\data\featured\f_daphnet_detection_3sec.npz"
 
-    npz_files = [f for f in os.listdir(input_dir) if f.endswith("p_daphnet_detection_3sec.npz")]
-    all_feats, all_labels = [], []
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    input_dir = BASE_DIR / "data" / "processed"
+    file_name = "p_daphnet_detection_3sec.npz"
 
-    for file in npz_files:
-        data = np.load(os.path.join(input_dir, file))
-        X = data["X"]
-        y = data["y"]
+    save_npz = input_dir / "f_daphnet_detection_3sec.npz"
+    save_csv = input_dir / "f_daphnet_detection_3sec.csv"
 
-        for i in range(len(X)):
-            sig_mag = compute_magnitude(X[i])
-            feats = extract_features(sig_mag)
-            all_feats.append(feats)
-            all_labels.append(y[i])
+    data = np.load(input_dir / file_name)
+    X = data["X"]
+    y = data["y"]
 
-        print("Processed:", file)
+    all_feats = []
+    for i in range(len(X)):
+        sig_mag = compute_magnitude(X[i])
+        feats = extract_features(sig_mag)
+        all_feats.append(feats)
 
     X_feats = np.array(all_feats)
-    y_feats = np.array(all_labels)
+    y_feats = np.array(y)
 
-    np.savez(save_path, X=X_feats, y=y_feats)
-    print("\nSaved:", save_path)
-    print("Final Shapes > X:", X_feats.shape, "| y:", y_feats.shape)
+    # Save NPZ
+    np.savez(save_npz, X=X_feats, y=y_feats)
+
+    # Save CSV
+    df = pd.DataFrame(X_feats)
+    df["label"] = y_feats
+    df.to_csv(save_csv, index=False)
+
+    print("Saved:", save_npz)
+    print("Saved:", save_csv)
+    print("Final Shapes -> X:", X_feats.shape, "| y:", y_feats.shape)

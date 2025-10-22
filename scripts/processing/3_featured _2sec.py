@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     # اعتمد نفس نظام المسارات الديناميكية كما في السكربتات السابقة
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
-    input_dir = BASE_DIR / "data" / "processed"
+    input_dir = BASE_DIR / "data" / "featured"
     # اسم ملف الإدخال المتوقع (نافذة 2s)
     file_name = "p_daphnet_detection_2sec.npz"
 

@@ -79,7 +79,7 @@ def extract_features(sig, fs=64):
 if __name__ == "__main__":
 
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
-    input_dir = BASE_DIR / "data" / "processed"
+    input_dir = BASE_DIR / "data" / "featured"
     file_name = "p_daphnet_detection_3sec.npz"
 
     save_npz = input_dir / "f_daphnet_detection_3sec.npz"
